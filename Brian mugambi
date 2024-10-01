@@ -1,0 +1,28 @@
+import yfinance as yf
+import pandas as pd
+
+
+ticker = "XAUUSD=X"
+start_date = "2023-01-01"
+end_date = "2024-10-02"
+data = yf.download(ticker, start=start_date, end=end_date)
+
+
+short_window = 50
+long_window = 200
+data['SMA_short'] = data['Close'].rolling(window=short_window).mean()
+data['SMA_long'] = data['Close'].rolling(window=long_window).mean()   
+
+positions = 0
+initial_investment = 10000
+portfolio_value = initial_investment
+for index, row in data.iterrows():
+    if row['SMA_short'] > row['SMA_long'] and positions == 0:
+        positions = initial_investment / row['Close']
+        print(f"Bought at {row['Close']} on {index}")
+    elif row['SMA_short'] < row['SMA_long'] and positions > 0:
+        portfolio_value = positions * row['Close']
+        print(f"Sold at {row['Close']} on {index}")
+        positions = 0
+
+print(f"Final portfolio value: {portfolio_value}")
